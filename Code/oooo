@@ -1,0 +1,206 @@
+import numpy as np
+import pandas as pd
+
+PointsID = pd.read_csv("/content/Points.csv")  # Список мест посадки и гейтов с их ID
+RoadID = pd.read_csv(
+    "/content/Road.csv"
+)  # Связи между местами посадки и гейтами с расстоянием между ними
+Reis = pd.read_csv("/content/Рейсы_-пассажиры.csv")  # Список событий с характеристиками
+Places_Id = PointsID.to_numpy()
+Places_Num = Reis["Номер места стоянки"].to_numpy()
+Events = len(Places_Num)
+ParkingNum = len(Places_Id)
+for i in range(Events):  #Заменяет номера стоянок на их ID
+    for j in range(ParkingNum):
+        if Places_Num[i] == Places_Id[j][1]:
+            Places_Num[i] = Places_Id[j][0]
+Events_Gates = Reis["Номер гейта"].to_numpy()
+for i in range(Events): #Заменяет название гейта на его ID
+    if Events_Gates[i] == "DGA_D":
+        Events_Gates[i] = 159
+    if Events_Gates[i] == "DGA_I":
+        Events_Gates[i] = 160
+passengers = Reis["Количество пассажиров"].to_numpy() 
+
+
+Ways = pd.read_csv("/content/Final.csv") #Final - файл с кратчайшими путями между местами посадок и гейтами
+
+
+class Bus(object): # Класс автобус с его свойствами
+    def __init__(self, size, Id):#Конструктор класса
+        self.size = size
+        self.Id = Id
+        self.loc = 160
+        self.state = "free"
+        self.change_state = -1
+        self.in_point = -1
+        self.out_point = -1
+
+    def _print(self):
+        print(self.size, self.Id, self.loc, self.state)
+
+    def send(self, in_p, out_p, time): #Начало выполнения автобусом задачи
+        """
+        Начало выполнения автобусом задачи
+        """
+        self.in_point = in_p
+        self.out_point = out_p
+        self.state = "on_the_way_to_In"
+        self.change_state = time
+
+
+BusAr = [] #Массив всех имеющихся автобусов
+for i in range(30):
+    BusAr.append(Bus(100, "D" + str(i + 1)))
+for i in range(30, 40):
+    BusAr.append(Bus(50, "D" + str(i + 1)))
+
+
+Landing_Time = Reis[["Плановое время"]].to_numpy()
+Landing_Time_Sec = []
+for i in range(Events):
+    DEL = str(Landing_Time[i])[2:-2]
+    DEL = DEL.split(":")
+    Landing_Time_Sec.append(int(DEL[0]) * 3600 + int(DEL[1]) * 60)
+
+passengers = Reis["Количество пассажиров"].to_numpy()
+Event_type = Reis["AD (A-прилет, D-вылет)"].to_numpy()
+
+
+def way_time(start, end): 
+  """
+Вычисление минимального времени по конечной и начальной точке маршрута
+  """
+    n = -1
+    for i in range(0, len(Ways)):
+        if (Ways["Way"].loc[Ways.index[i]]) == str(start) + ":" + str(end):
+            n = i
+            break
+    if n == -1:
+        way_time_to_In = 180
+    else:
+        len_Way = int(Ways["Length"].loc[Ways.index[n]])
+        way_time_to_In = (len_Way) / (25 / 3)
+    return way_time_to_In
+
+
+ended_events = 0
+Events = 30
+for TimeLine in range(86400): #Моделирование рабочего дня
+    for i in range(ended_events, Events):
+        nearest_buses = []
+        if Event_type[i] == "A":
+            in_point = Places_Num[i]
+            out_point = Events_Gates[i]
+            for b in BusAr:
+                if Landing_Time_Sec[i] == (TimeLine + way_time(b.loc, in_point)):
+                    if b.state == "free":
+                        nearest_buses.append(b)
+            while passengers[i] > 0 and len(nearest_buses) > 0:
+                if passengers[i] > 50:
+                    is_100 = False
+                    for b in nearest_buses:
+                        if b.size == 100:
+                            is_100 = True
+                            b.send(in_point, out_point, Landing_Time_Sec[i])
+                            passengers[i] -= 100
+                            nearest_buses.remove(b)
+                    if not is_100:
+                        for b in nearest_buses:
+                            if b.size == 50:
+                                b.send(in_point, out_point, Landing_Time_Sec[i])
+                                passengers[i] -= 50
+                else:
+                    is_50 = False
+                    for b in nearest_buses:
+                        if b.size == 50:
+                            is_50 = True
+                            b.send(in_point, out_point, Landing_Time_Sec[i])
+                            passengers[i] -= 50
+                    if not is_50:
+                        for b in nearest_buses:
+                            if b.size == 100:
+                                is_100 = True
+                                b.send(in_point, out_point, Landing_Time_Sec[i])
+                                passengers[i] -= 100
+        if Event_type[i] == "D":
+            in_point = Events_Gates[i]
+            out_point = Places_Num[i]
+            for b in BusAr:
+                if Landing_Time_Sec[i] == (
+                    TimeLine
+                    + way_time(b.loc, in_point)
+                    + 600
+                    + way_time(in_point, out_point)
+                ):
+                    if b.state == "free":
+                        nearest_buses.append(b)
+            while passengers[i] > 0 and len(nearest_buses) > 0:
+                if passengers[i] > 50:
+                    is_100 = False
+                    for b in nearest_buses:
+                        if b.size == 100:
+                            is_100 = True
+                            b.send(
+                                in_point,
+                                out_point,
+                                TimeLine + way_time(b.loc, in_point),
+                            )
+                            passengers[i] -= 100
+                            nearest_buses.remove(b)
+                    if not is_100:
+                        for b in nearest_buses:
+                            if b.size == 50:
+                                b.send(
+                                    in_point,
+                                    out_point,
+                                    TimeLine + way_time(b.loc, in_point),
+                                )
+                                passengers[i] -= 50
+                else:
+                    is_50 = False
+                    for b in nearest_buses:
+                        if b.size == 50:
+                            is_50 = True
+                            b.send(
+                                in_point,
+                                out_point,
+                                TimeLine + way_time(b.loc, in_point),
+                            )
+                            passengers[i] -= 50
+                    if not is_50:
+                        for b in nearest_buses:
+                            if b.size == 100:
+                                is_100 = True
+                                b.send(
+                                    in_point,
+                                    out_point,
+                                    TimeLine + way_time(b.loc, in_point),
+                                )
+                                passengers[i] -= 100
+        if Landing_Time_Sec[i] > TimeLine:
+            ended_events = i
+    for j in range(len(BusAr)):
+        if TimeLine == BusAr[j].change_state:
+            if BusAr[j].state == "on_the_way_to_In":
+                BusAr[j].state = "In"
+                BusAr[j].change_state = TimeLine + 600
+                BusAr[j].loc = BusAr[j].in_point
+            elif BusAr[j].state == "In":
+                BusAr[j].state = "on_the_way_to_Out"
+                way_time_to_Out = way_time(BusAr[j].in_point, BusAr[j].out_point)
+                BusAr[j].change_state = TimeLine + way_time_to_Out
+            elif BusAr[j].state == "on_the_way_to_Out":
+                BusAr[j].state = "Out"
+                BusAr[j].change_state = TimeLine + 300
+                BusAr[j].loc = BusAr[j].in_point
+            elif BusAr[j] == "Out":
+                BusAr[j].state = "free"
+                BusAr[j].change_state = -1
+            else:
+                print("Allert, some shit happened!")
+        if TimeLine % 3600 == 0:
+            print(TimeLine // 3600, "H:\n")
+            for c in BusAr:
+                print("\t")
+                c._print()
