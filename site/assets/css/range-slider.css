@@ -1,0 +1,79 @@
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.noUi-target {
+    background: none;
+    box-shadow: none;
+    background-color: red;
+    border-radius: 5px;
+    height: 40px;
+}
+
+.noUi-connect {
+    background: green;
+}
+
+.noUi-handle::after,
+.noUi-handle::before {
+    display: none;
+}
+
+.noUi-handle {
+    border: 2px solid black;
+    box-shadow: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.noUi-horizontal .noUi-handle {
+    width: 20px;
+    height: 40px;
+    right: -17px;
+    top: -1px;
+}
+
+.range-slider-bar {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 22em;
+    color: yellow;
+}
+
+.q {
+    padding-top: 50px;
+}
+
+.range-slider {
+    padding-top: 60px;
+    display: flex;
+    text-align: center;
+
+    position: absolute;
+    left: 51%;
+    transform: translate(-50%, -50%);
+}
+
+.filters-hour__label {
+    margin: 15px 40px;
+    text-align: center;
+}
+
+.filters-hour__label input {
+    padding: 7px;
+    width: 100%;
+    color: #fff;
+    font-size: 20px;
+    background: none;
+    outline: none;
+    border: 1px solid #fff;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+
+.filters-hour__label input[type="text"]:focus {
+    border: 1px solid #fed136;
+}

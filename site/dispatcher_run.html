@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dispatcher profile</title>
+
+    <link rel="stylesheet" href="assets/css/dispatcher_run_style.css">
+    <link rel="stylesheet" href="range/nouislider.min.css">
+    <link rel="stylesheet" href="./assets/css/range-slider.css">
+
+    <link rel="icon" type="image" href="./assets/images/icon.ico">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <div class="q"></div>
+
+    <div class="range-slider-bar" id="range_slider"></div>
+
+    <div class="range-slider">
+
+        <div class="filters-hour__label">
+            <input type="text" id="input-0" placeholder="от 0 до 23">
+        </div>
+        <div class="filters-hour__label">
+            <input type="text" id="input-1" placeholder="от 0 до 23">
+        </div>
+    </div>
+
+    <div class="q"></div>
+
+    <div id="dispatcher_tasks"></div>
+
+    <script src="./constants/catalog.js"></script>
+    <script src="./constants/root.js"></script>
+    <script src="./utils/localStorageUtil.js"></script>
+
+    <script src="./assets/js/Filtr.js"></script>
+    <link rel="stylesheet" href="./assets/css/Filtr.css">
+
+    <script src="./assets/js/Dispatcher_tasks.js"></script>
+    <script src="./range/nouislider.min.js"></script>
+    <script src="./assets/js/range-slider.js"></script>
+    <link rel="stylesheet" href="./assets/css/Dispatcher_tasks.css">
+
+</body>
+
+</html>
